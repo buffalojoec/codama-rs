@@ -74,6 +74,8 @@ impl KorokVisitable for codama_koroks::ItemKorok<'_> {
             codama_koroks::ItemKorok::Module(k) => vec![k as &mut dyn KorokVisitable],
             codama_koroks::ItemKorok::Struct(k) => vec![k as &mut dyn KorokVisitable],
             codama_koroks::ItemKorok::Enum(k) => vec![k as &mut dyn KorokVisitable],
+            codama_koroks::ItemKorok::Impl(k) => vec![k as &mut dyn KorokVisitable],
+            codama_koroks::ItemKorok::Const(k) => vec![k as &mut dyn KorokVisitable],
             codama_koroks::ItemKorok::Unsupported(k) => vec![k as &mut dyn KorokVisitable],
         }
     }
@@ -151,6 +153,27 @@ impl KorokVisitable for codama_koroks::EnumVariantKorok<'_> {
     }
     fn get_children(&mut self) -> Vec<&mut dyn KorokVisitable> {
         vec![&mut self.fields as &mut dyn KorokVisitable]
+    }
+}
+
+impl KorokVisitable for codama_koroks::ImplKorok<'_> {
+    fn accept(&mut self, visitor: &mut dyn KorokVisitor) -> CodamaResult<()> {
+        visitor.visit_impl(self)
+    }
+    fn get_children(&mut self) -> Vec<&mut dyn KorokVisitable> {
+        self.constants
+            .iter_mut()
+            .map(|c| c as &mut dyn KorokVisitable)
+            .collect()
+    }
+}
+
+impl KorokVisitable for codama_koroks::ConstKorok<'_> {
+    fn accept(&mut self, visitor: &mut dyn KorokVisitor) -> CodamaResult<()> {
+        visitor.visit_const(self)
+    }
+    fn get_children(&mut self) -> Vec<&mut dyn KorokVisitable> {
+        Vec::new()
     }
 }
 
